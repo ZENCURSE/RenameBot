@@ -1,5 +1,5 @@
 from pyrogram import Client, filters
-from database.database import db
+from helper.database import db
 
 @Client.on_message(filters.private & filters.command("metadata"))
 async def metadata_handler(c, m):
