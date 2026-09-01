@@ -22,7 +22,7 @@ License Link :https://github.com/Codeflix-Bots/RenameBot/blob/main/LICENSE
 
 import re, os, time
 
-id_pattern = re.compile(r'^.\d+$') 
+id_pattern = re.compile(r'^\d+$') 
 
 class Config(object):
     # pyro client config
