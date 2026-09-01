@@ -76,9 +76,14 @@ class Database:
         user = await self.col.find_one({'_id': int(id)})
         return user.get('caption', None)
 
+    # --- NEW METADATA CODE ADDED HERE ---
+    async def get_metadata(self, id):
+        user = await self.col.find_one({'_id': int(id)})
+        if user:
+            return user.get('metadata', '')
+        return ''
+
+    async def set_metadata(self, id, metadata):
+        await self.col.update_one({'_id': int(id)}, {'$set': {'metadata': metadata}}, upsert=True)
 
 db = Database(Config.DB_URL, Config.DB_NAME)
-
-
-
-
