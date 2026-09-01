@@ -31,18 +31,18 @@ class Config(object):
     BOT_TOKEN = os.environ.get("BOT_TOKEN", "") 
    
     # database config
-    DB_NAME = os.environ.get("DB_NAME","")     
+    DB_NAME = os.environ.get("DB_NAME","Cluster0")     
     DB_URL  = os.environ.get("DB_URL","")
  
     # other configs
     BOT_UPTIME  = time.time()
     START_PIC   = os.environ.get("START_PIC", "")
     ADMIN       = [int(admin) if id_pattern.search(admin) else admin for admin in os.environ.get('ADMIN', '').split()]
-    FORCE_SUB   = os.environ.get("FORCE_SUB", "team_netflix") 
-    LOG_CHANNEL = int(os.environ.get("LOG_CHANNEL", None))
+    FORCE_SUB   = os.environ.get("FORCE_SUB", "") 
+    LOG_CHANNEL = int(os.environ.get("LOG_CHANNEL", "0"))
 
     # wes response configuration     
-    WEBHOOK = bool(os.environ.get("WEBHOOK", "False"))
+    WEBHOOK = bool(os.environ.get("WEBHOOK", "False")) == "True"
 
 
 class Txt(object):
