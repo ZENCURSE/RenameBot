@@ -27,7 +27,6 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ForceReply, CallbackQuery
 from helper.database import db
 from config import Config, Txt  
-  
 
 @Client.on_message(filters.private & filters.command("start"))
 async def start(client, message):
@@ -46,16 +45,13 @@ async def start(client, message):
         await message.reply_photo(Config.START_PIC, caption=Txt.START_TXT.format(user.mention), reply_markup=button)       
     else:
         await message.reply_text(text=Txt.START_TXT.format(user.mention), reply_markup=button, disable_web_page_preview=True)
-   
 
 @Client.on_callback_query(filters.regex("^(start|help|about|dev|close|CodeRips)$"))
 async def cb_handler(client, query: CallbackQuery):
     data = query.data 
-    if data == "start":
-        await query.message.edit_text(
-            text=Txt.START_TXT.format(query.from_user.mention),
-            disable_web_page_preview=True,
-            reply_markup = InlineKeyboardMarkup([[
+    try:
+        if data == "start":
+            btn = InlineKeyboardMarkup([[
                 InlineKeyboardButton("👨‍💻 Dᴇᴠꜱ 👨‍💻", callback_data='dev')
                 ],[
                 InlineKeyboardButton('📯 Uᴩᴅᴀᴛᴇꜱ', url='https://t.me/CodeRips'),
@@ -64,56 +60,61 @@ async def cb_handler(client, query: CallbackQuery):
                 InlineKeyboardButton('🎛️ Aʙᴏᴜᴛ', callback_data='about'),
                 InlineKeyboardButton('🛠️ Hᴇʟᴩ', callback_data='help')
             ]])
-        )
-    elif data == "help":
-        await query.message.edit_text(
-            text=Txt.HELP_TXT,
-            disable_web_page_preview=True,
-            reply_markup=InlineKeyboardMarkup([[
-                #⚠️ don't change source code & source link ⚠️ #
+            # FIX: handle photo message
+            if query.message.photo:
+                await query.message.edit_caption(caption=Txt.START_TXT.format(query.from_user.mention), reply_markup=btn)
+            else:
+                await query.message.edit_text(text=Txt.START_TXT.format(query.from_user.mention), disable_web_page_preview=True, reply_markup=btn)
+
+        elif data == "help":
+            btn = InlineKeyboardMarkup([[
                 InlineKeyboardButton("≛ ᴏᴡɴᴇʀ", url="https://t.me/ZENCURSE")
                 ],[
                 InlineKeyboardButton("🧐 ʀᴇᴘᴏʀᴛ ᴀʙᴜꜱᴇ", url='https://t.me/Code_Rips_support_bot')
                 ],[
                 InlineKeyboardButton("✗ Cʟᴏꜱᴇ", callback_data = "close"),
                 InlineKeyboardButton("« Bᴀᴄᴋ", callback_data = "start")
-            ]])            
-        )
-    elif data == "about":
-        await query.message.edit_text(
-            text=Txt.ABOUT_TXT.format(client.mention),
-            disable_web_page_preview = True,
-            reply_markup=InlineKeyboardMarkup([[
-                #⚠️ don't change source code & source link ⚠️ #
+            ]])
+            if query.message.photo:
+                await query.message.edit_caption(caption=Txt.HELP_TXT, reply_markup=btn)
+            else:
+                await query.message.edit_text(text=Txt.HELP_TXT, disable_web_page_preview=True, reply_markup=btn)
+
+        elif data == "about":
+            btn = InlineKeyboardMarkup([[
                 InlineKeyboardButton("ᴏᴜʀ ʙᴏᴛꜱ", callback_data = "CodeRips")
                 ],[
                 InlineKeyboardButton("✗ Cʟᴏꜱᴇ", callback_data = "close"),
                 InlineKeyboardButton("Developer", callback_data = "dev")
-            ]])            
-        )
-    elif data == "dev":
-        await query.message.edit_text(
-            text=Txt.DEV_TXT,
-            disable_web_page_preview=True,
-            reply_markup=InlineKeyboardMarkup([[
-                #⚠️ don't change source code & source link ⚠️ #
+            ]])
+            if query.message.photo:
+                await query.message.edit_caption(caption=Txt.ABOUT_TXT.format(client.mention), reply_markup=btn)
+            else:
+                await query.message.edit_text(text=Txt.ABOUT_TXT.format(client.mention), disable_web_page_preview=True, reply_markup=btn)
+
+        elif data == "dev":
+            btn = InlineKeyboardMarkup([[
                 InlineKeyboardButton("≛ ᴏᴡɴᴇʀ", url="https://t.me/ZENCURSE")
                 ],[
-                InlineKeyboardButton("🧐 ʀᴇᴘᴏʀᴛ ᴀʙᴜꜱᴇ", url="https://t.me/Code_Rips_support_bot")
+                InlineKeyboardButton("🧐 ʀᴇᴘᴏʀᴛ ᴀʙᴜꜱᴇ", url='https://t.me/Code_Rips_support_bot')
                 ],[
                 InlineKeyboardButton("✗ Cʟᴏꜱᴇ", callback_data = "close"),
                 InlineKeyboardButton("« Bᴀᴄᴋ", callback_data = "start")
-            ]])          
-        )
-    elif data == "close":
-        try:
-            await query.message.delete()
-            await query.message.reply_to_message.delete()
-            await query.message.continue_propagation()
-        except:
-            await query.message.delete()
-            await query.message.continue_propagation()
+            ]])
+            if query.message.photo:
+                await query.message.edit_caption(caption=Txt.DEV_TXT, reply_markup=btn)
+            else:
+                await query.message.edit_text(text=Txt.DEV_TXT, disable_web_page_preview=True, reply_markup=btn)
 
-
-
-
+        elif data == "close":
+            try:
+                await query.message.delete()
+                if query.message.reply_to_message:
+                    await query.message.reply_to_message.delete()
+            except:
+                try:
+                    await query.message.delete()
+                except:
+                    pass
+    except Exception as e:
+        print(f"Callback error: {e}")
