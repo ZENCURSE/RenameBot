@@ -16,7 +16,7 @@ class Bot(Client):
             workers=200,
             plugins={"root": "plugins"},
             sleep_threshold=15,
-            in_memory=True  # <-- FIX 1: no session file for hosting
+            in_memory=True
         )
 
     async def start(self):
@@ -24,9 +24,8 @@ class Bot(Client):
         me = await self.get_me()
         self.mention = me.mention
         self.username = me.username  
-        self.uptime = datetime.now() # <-- FIX 2: don't use Config.BOT_UPTIME     
+        self.uptime = datetime.now()
         
-        # FIX 3: safe webhook check
         if getattr(Config, "WEBHOOK", False):
             app = web.AppRunner(await web_server())
             await app.setup()       
@@ -38,15 +37,6 @@ class Bot(Client):
                 await self.send_message(id, f"**{me.first_name} Is Started.....**")                                
             except: 
                 pass
-                
-        if getattr(Config, "LOG_CHANNEL", None):
-            try:
-                curr = datetime.now(timezone("Asia/Kolkata"))
-                date = curr.strftime('%d %B, %Y')
-                time = curr.strftime('%I:%M:%S %p')
-                await self.send_message(Config.LOG_CHANNEL, f"**{me.mention} Is Restarted !!**\n\nDate : {date}\nTime : {time}\nVersion : v{__version__} (Layer {layer})")                                
-            except Exception as e:
-                print(f"Log channel error: {e}")
 
     async def stop(self, *args):
         await super().stop()
