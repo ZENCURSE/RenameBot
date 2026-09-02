@@ -7,7 +7,6 @@ from aiohttp import web
 from route import web_server
 
 class Bot(Client):
-
     def __init__(self):
         super().__init__(
             name="renamer",
@@ -17,6 +16,7 @@ class Bot(Client):
             workers=200,
             plugins={"root": "plugins"},
             sleep_threshold=15,
+            in_memory=True  # <-- FIX 1: no session file for hosting
         )
 
     async def start(self):
@@ -24,22 +24,32 @@ class Bot(Client):
         me = await self.get_me()
         self.mention = me.mention
         self.username = me.username  
-        self.uptime = Config.BOT_UPTIME     
-        if Config.WEBHOOK:
+        self.uptime = datetime.now() # <-- FIX 2: don't use Config.BOT_UPTIME     
+        
+        # FIX 3: safe webhook check
+        if getattr(Config, "WEBHOOK", False):
             app = web.AppRunner(await web_server())
             await app.setup()       
             await web.TCPSite(app, "0.0.0.0", 8080).start()     
-        print(f"{me.first_name} Iꜱ Sᴛᴀʀᴛᴇᴅ.....✨️")
+            
+        print(f"{me.first_name} Is Started.....")
         for id in Config.ADMIN:
-            try: await self.send_message(id, f"**__{me.first_name}  Iꜱ Sᴛᴀʀᴛᴇᴅ.....✨️__**")                                
-            except: pass
-        if Config.LOG_CHANNEL:
+            try: 
+                await self.send_message(id, f"**{me.first_name} Is Started.....**")                                
+            except: 
+                pass
+                
+        if getattr(Config, "LOG_CHANNEL", None):
             try:
                 curr = datetime.now(timezone("Asia/Kolkata"))
                 date = curr.strftime('%d %B, %Y')
                 time = curr.strftime('%I:%M:%S %p')
-                await self.send_message(Config.LOG_CHANNEL, f"**__{me.mention} Iꜱ Rᴇsᴛᴀʀᴛᴇᴅ !!**\n\n📅 Dᴀᴛᴇ : `{date}`\n⏰ Tɪᴍᴇ : `{time}`\n🌐 Tɪᴍᴇᴢᴏɴᴇ : `Asia/Kolkata`\n\n🉐 Vᴇʀsɪᴏɴ : `v{__version__} (Layer {layer})`</b>")                                
-            except:
-                print("Pʟᴇᴀꜱᴇ Mᴀᴋᴇ Tʜɪꜱ Iꜱ Aᴅᴍɪɴ Iɴ Yᴏᴜʀ Lᴏɢ Cʜᴀɴɴᴇʟ")
+                await self.send_message(Config.LOG_CHANNEL, f"**{me.mention} Is Restarted !!**\n\nDate : {date}\nTime : {time}\nVersion : v{__version__} (Layer {layer})")                                
+            except Exception as e:
+                print(f"Log channel error: {e}")
+
+    async def stop(self, *args):
+        await super().stop()
+        print("Bot Stopped")
 
 Bot().run()
