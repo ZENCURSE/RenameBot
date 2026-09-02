@@ -16,8 +16,7 @@ class Config(object):
     BOT_UPTIME  = time.time()
     START_PIC   = os.environ.get("START_PIC", "")
     ADMIN       = [int(admin) if id_pattern.search(admin) else admin for admin in os.environ.get('ADMIN', '').split()]
-    FORCE_SUB   = os.environ.get("FORCE_SUB", "") 
-    LOG_CHANNEL = os.environ.get("LOG_CHANNEL", "")
+    FORCE_SUB   = os.environ.get("FORCE_SUB", "")
 
     # wes response configuration     
     WEBHOOK = os.environ.get("WEBHOOK", "True")
